@@ -1,0 +1,35 @@
+- name: gen locale {{locale}}
+  command: /usr/sbin/locale-gen "{{locale}}"
+
+- name: Add locale settings into /etc/locale.gen
+  lineinfile:
+    dest: /etc/locale.gen
+    line: "{{ locale }} {{ locale }}.{{ locale_encoding }}"
+    regexp: "{{ locale }} {{ locale }}.{{ locale_encoding }}"
+    owner: root
+    state: present
+    insertafter: EOF
+    create: true
+
+- name: gen locale {{locale}}
+  command: /usr/sbin/dpkg-reconfigure -f noninteractive locales
+
+- name: set locale to {{locale}}
+  command: /usr/sbin/update-locale LANG={{ locale }}.{{ locale_encoding }} LC_ALL={{ locale }}.{{ locale_encoding }}
+
+- name: set /etc/localtime to {{ timezone  }}
+  copy:
+    src: /usr/share/zoneinfo/{{ timezone  }}
+    dest: /etc/localtime
+
+- name: set /etc/timezone to {{ timezone  }}
+  template: src=etc/timezone dest=/etc/timezone
+  notify: update tzdata
+
+- name: Shell locales
+  copy:
+    dest: /etc/profile.d/lang.sh
+    content: |
+      export LANGUAGE="{{ locale }}.{{ locale_encoding }}"
+      export LANG="{{ locale }}.{{ locale_encoding }}"
+      export LC_ALL="{{ locale }}.{{ locale_encoding }}"

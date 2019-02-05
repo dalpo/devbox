@@ -1,0 +1,8 @@
+---
+
+- name: Install required packages for HTTPS repositories
+  apt: name={{ item.package }} state=present update_cache=yes cache_valid_time=3600
+  become: yes
+  with_items:
+    - package: apt-transport-https
+    - package: ca-certificates

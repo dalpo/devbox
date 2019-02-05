@@ -1,0 +1,18 @@
+---
+- name: gather facts
+  setup:
+
+# - name: Refresh all current apt-secure repository PGP keys
+# command: apt-key adv --refresh-keys --keyserver ha.pool.sks-keyservers.net
+
+- name: Perform Safe Upgrade
+  apt: upgrade=safe update_cache=yes
+
+- name: Update ca-certificates
+  command: apt-get install --reinstall ca-certificates
+
+- include: repositories.yml
+
+- include: packages.yml
+
+- include: locale.yml

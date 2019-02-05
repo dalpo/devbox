@@ -1,0 +1,25 @@
+
+asdf_plugins:
+  - name: "erlang"    # a plugin name
+    versions:         # a list of versions to install
+      - 18.3
+      - 20.1
+    global: 20.1      # set as a global version, optional
+
+  - name: "elixir"
+    versions:
+      - 1.7
+    global: 1.7
+
+  - name: "ruby"
+    versions:
+      - 2.5.3
+      - 2.6.1
+    global: 2.6.1
+
+  - name: "nodejs"
+    versions:
+      - 10.15.1 
+    global: 10.15.1
+
+asdf_user: "vagrant"

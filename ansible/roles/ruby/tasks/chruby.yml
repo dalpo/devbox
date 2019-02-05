@@ -1,0 +1,20 @@
+---
+- name: Download chruby
+  get_url:
+    url: "https://github.com/postmodern/chruby/archive/v{{ chruby_version }}.tar.gz"
+    dest: /root/chruby.tar.gz
+    validate_certs: no
+
+- name: Unpack chruby
+  shell: |
+    cd /root
+    tar -xzvf /root/chruby.tar.gz
+
+- name: Install chruby
+  make: chdir=/root/chruby-{{ chruby_version }} target=install
+
+- name: Copy chruby.sh
+  copy: src=chruby.sh dest=/etc/profile.d/chruby.sh owner=root group=root
+
+- name: Install Bundler
+  command: /usr/local/bin/chruby-exec ruby-{{ ruby_version }} -- gem install bundler

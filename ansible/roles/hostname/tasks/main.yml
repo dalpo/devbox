@@ -1,0 +1,4 @@
+---
+
+- include: hostname.yml
+  when: rename_hostname is defined and rename_hostname == true
