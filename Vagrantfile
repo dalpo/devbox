@@ -25,6 +25,8 @@ Vagrant.configure('2') do |config|
   config.vm.box = 'debian/stretch64'
   config.vm.box_version = '9.7.0'
 
+  config.disksize.size = '30GB'
+
   # Disable automatic box update checking. If you disable this, then
   # boxes will only be checked for updates when the user runs
   # `vagrant box outdated`. This is not recommended.

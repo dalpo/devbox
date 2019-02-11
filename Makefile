@@ -19,3 +19,4 @@ endif
 install_dependencies:
 	pip install -r ./requirements.txt
 	vagrant plugin install vagrant-vbguest
+	vagrant plugin install vagrant-disksize
