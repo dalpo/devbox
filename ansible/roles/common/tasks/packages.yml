@@ -26,3 +26,5 @@
     - graphicsmagick
     - sudo
     - resolvconf
+    - silversearcher-ag
+    - zsh
