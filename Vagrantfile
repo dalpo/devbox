@@ -1,16 +1,6 @@
 # -*- mode: ruby -*-
 # vi: set ft=ruby :
 
-# require 'bundler/inline'
-#
-# gemfile do
-#   source 'https://rubygems.org'
-#   gem 'dotenv', '~> 2.6.0'
-# end
-#
-# require 'dotenv/load'
-# Dotenv.load
-
 # All Vagrant configuration is done below. The '2' in Vagrant.configure
 # configures the configuration version (we support older styles for
 # backwards compatibility). Please don't change it unless you know what
@@ -25,7 +15,7 @@ Vagrant.configure('2') do |config|
   config.vm.box = 'debian/stretch64'
   config.vm.box_version = '9.7.0'
 
-  config.disksize.size = '30GB'
+  config.disksize.size = ENV.fetch('DEVBOX_DISKSIZE', '30GB')
 
   # Disable automatic box update checking. If you disable this, then
   # boxes will only be checked for updates when the user runs
@@ -41,6 +31,9 @@ Vagrant.configure('2') do |config|
     config.vm.network 'forwarded_port', guest: port, host: port
   end
 
+  config.vm.hostname = ENV.fetch('HOSTNAME', 'd3vb0x.local')
+  config.vm.network :private_network, ip: ENV.fetch('LOCAL_NETWORK_IP', '192.168.99.99')
+  
   # Create a forwarded port mapping which allows access to a specific port
   # within the machine from a port on the host machine and only allow access
   # via 127.0.0.1 to disable public access
@@ -60,7 +53,14 @@ Vagrant.configure('2') do |config|
   # the path on the guest to mount the folder. And the optional third
   # argument is a set of non-required options.
   config.vm.synced_folder '.', '/vagrant', disabled: true
-  config.vm.synced_folder '../workspace', '/workspace'
+  
+  config.nfs.map_uid = Process.uid
+  config.nfs.map_gid = Process.gid
+  config.vm.synced_folder \
+    '../workspace', '/workspace', 
+    nfs: true, create: true,
+    mount_options: ['rw', 'vers=3', 'tcp'],
+    linux__nfs_options: ['rw',' no_subtree_check', 'all_squash', 'async']
 
   config.ssh.insert_key = true
 
@@ -73,8 +73,9 @@ Vagrant.configure('2') do |config|
     vb.gui = false
 
     # Customize the amount of memory on the VM:
-    vb.memory = ENV.fetch('DEVBOX_MEMORY', 8192)
-    vb.cpus = ENV.fetch('DEVBOX_CPUS', 2)
+    vb.memory = ENV.fetch('DEVBOX_MEMORY', 8192).to_i
+    cpus = ENV.fetch('DEVBOX_CPUS', 6).to_i
+    vb.cpus = cpus
 
     # Use VBoxManage to customize the VM. For example to change memory:
     vb.customize ['modifyvm', :id, '--name', 'd3vb0x']
@@ -102,5 +103,34 @@ Vagrant.configure('2') do |config|
     # ansible.extra_vars = {
     #   rename_hostname: false
     # }
+  end
+
+  config.vm.provision "shell" do |s|
+    ssh_prv_key = ""
+    ssh_pub_key = ""
+
+    if File.file?("#{Dir.home}/.ssh/id_rsa")
+      ssh_prv_key = File.read("#{Dir.home}/.ssh/id_rsa")
+      ssh_pub_key = File.readlines("#{Dir.home}/.ssh/id_rsa.pub").first.strip
+    else
+      puts "No SSH key found. You will need to remedy this before pushing to the repository."
+    end
+
+    s.inline = <<-SHELL
+      if grep -sq "#{ssh_pub_key}" /home/vagrant/.ssh/authorized_keys; then
+        echo "SSH keys already provisioned."
+        exit 0;
+      fi
+      echo "SSH key provisioning."
+      mkdir -p /home/vagrant/.ssh/
+      touch /home/vagrant/.ssh/authorized_keys
+      echo #{ssh_pub_key} >> /home/vagrant/.ssh/authorized_keys
+      echo #{ssh_pub_key} > /home/vagrant/.ssh/id_rsa.pub
+      chmod 644 /home/vagrant/.ssh/id_rsa.pub
+      echo "#{ssh_prv_key}" > /home/vagrant/.ssh/id_rsa
+      chmod 600 /home/vagrant/.ssh/id_rsa
+      chown -R vagrant:vagrant /home/vagrant
+      exit 0
+    SHELL
   end
 end

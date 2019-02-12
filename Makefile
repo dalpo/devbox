@@ -20,3 +20,11 @@ install_dependencies:
 	pip install -r ./requirements.txt
 	vagrant plugin install vagrant-vbguest
 	vagrant plugin install vagrant-disksize
+
+.PHONY: provision
+
+provision:
+	export DEVBOX_DISKSIZE="30GB"
+	export DEVBOX_CPUS=6
+	vagrant up
+	vagrant provision
