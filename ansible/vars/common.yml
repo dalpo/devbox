@@ -22,4 +22,9 @@ asdf_plugins:
       - 10.15.1 
     global: 10.15.1
 
+  - name: "rust"
+    versions:
+      - 1.32.0
+    global: 1.32.0
+
 asdf_user: "vagrant"

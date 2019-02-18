@@ -1,0 +1,45 @@
+---
+
+- import_tasks: ubuntu.yml
+  when: ansible_distribution == 'Ubuntu'
+
+- import_tasks: debian.yml
+  when: ansible_distribution == 'Debian'
+
+- name: Install docker-compose
+  get_url:
+    url: "https://github.com/docker/compose/releases/download/{{ docker_compose_version }}/docker-compose-Linux-x86_64"
+    dest: "/usr/bin/docker-compose"
+    sha256sum: "{{ docker_compose_hash }}"
+    mode: 0755
+  become: yes
+
+- name: Install Docker packages
+  package:
+    name: "{{ item.package }}"
+    state: latest
+  become: yes
+  register: docker_packages
+  with_items: "{{ install_packages }}"
+
+- name: Install Python packages
+  pip:
+    name: "{{ item.package }}"
+    state: latest
+  with_items: "{{ install_python_packages }}"
+
+- name: Uninstall Python packages
+  pip:
+    name: "{{ item.package }}"
+    state: absent
+  with_items: "{{ uninstall_python_packages }}"
+
+- name: Install docker-compose Python
+  pip:
+    name: docker-compose
+
+- name: Copy docker daemon.json
+  template: src=daemon.json dest=/etc/docker/daemon.json owner=root group=docker
+
+- name: Restart Dockerd
+  service: name=docker state=restarted enabled=yes
