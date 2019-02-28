@@ -1,0 +1,20 @@
+---
+
+docker_compose_version: "1.23.1"
+docker_compose_hash: "c176543737b8aea762022245f0f4d58781d3cb1b072bc14f3f8e5bb96f90f1a2"
+
+install_python_packages:
+  - package: "docker"
+
+uninstall_python_packages:
+  - package: "docker-py"
+
+install_packages:
+  - package: "docker-ce"
+  - package: "python-pip"
+  - package: "python-setuptools"
+
+uninstall_packages:
+  - package: "docker-engine"
+  - package: "docker"
+  - package: "dockerio"

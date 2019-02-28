@@ -12,10 +12,11 @@ Vagrant.configure('2') do |config|
 
   # Every Vagrant development environment requires a box. You can search for
   # boxes at https://vagrantcloud.com/search.
-  config.vm.box = 'debian/stretch64'
-  config.vm.box_version = '9.7.0'
+  # config.vm.box = 'debian/stretch64'
+  # config.vm.box_version = '9.7.0'
+  config.vm.box = 'ubuntu/bionic64'
 
-  config.disksize.size = ENV.fetch('DEVBOX_DISKSIZE', '30GB')
+  config.disksize.size = ENV.fetch('DEVBOX_DISKSIZE', '50GB')
 
   # Disable automatic box update checking. If you disable this, then
   # boxes will only be checked for updates when the user runs
@@ -96,18 +97,10 @@ Vagrant.configure('2') do |config|
   #   apt-get install -y apache2
   # SHELL
 
-  config.vm.provision 'ansible' do |ansible|
-    ansible.playbook = 'ansible/playbook.yml'
-    ansible.verbose = true
-    # ansible.vault_password_file = VAULT_PASSWORD_FILE
-    # ansible.extra_vars = {
-    #   rename_hostname: false
-    # }
-  end
-
   config.vm.provision "shell" do |s|
     ssh_prv_key = ""
     ssh_pub_key = ""
+    ssh_config = ""
 
     if File.file?("#{Dir.home}/.ssh/id_rsa")
       ssh_prv_key = File.read("#{Dir.home}/.ssh/id_rsa")
@@ -116,7 +109,13 @@ Vagrant.configure('2') do |config|
       puts "No SSH key found. You will need to remedy this before pushing to the repository."
     end
 
+    if File.file?("#{Dir.home}/.ssh/config")
+      ssh_config = File.read("#{Dir.home}/.ssh/config")
+    end
+ 
     s.inline = <<-SHELL
+      sudo apt install -y python
+
       if grep -sq "#{ssh_pub_key}" /home/vagrant/.ssh/authorized_keys; then
         echo "SSH keys already provisioned."
         exit 0;
@@ -125,6 +124,9 @@ Vagrant.configure('2') do |config|
       mkdir -p /home/vagrant/.ssh/
       touch /home/vagrant/.ssh/authorized_keys
       echo #{ssh_pub_key} >> /home/vagrant/.ssh/authorized_keys
+      touch /home/vagrant/.ssh/config
+      echo #{ssh_config} >> /home/vagrant/.ssh/config
+      chmod 644 /home/vagrant/.ssh/config
       echo #{ssh_pub_key} > /home/vagrant/.ssh/id_rsa.pub
       chmod 644 /home/vagrant/.ssh/id_rsa.pub
       echo "#{ssh_prv_key}" > /home/vagrant/.ssh/id_rsa
@@ -132,5 +134,14 @@ Vagrant.configure('2') do |config|
       chown -R vagrant:vagrant /home/vagrant
       exit 0
     SHELL
+  end
+
+  config.vm.provision 'ansible' do |ansible|
+    ansible.playbook = 'ansible/playbook.yml'
+    ansible.verbose = true
+  #   # ansible.vault_password_file = VAULT_PASSWORD_FILE
+  #   # ansible.extra_vars = {
+  #   #   rename_hostname: false
+  #   # }
   end
 end
