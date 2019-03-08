@@ -28,6 +28,9 @@ Vagrant.configure('2') do |config|
   # accessing 'localhost:8080' will access port 80 on the guest machine.
   # NOTE: This will enable public access to the opened port
   # config.vm.network 'forwarded_port', guest: 80, host: 8080
+  
+  config.vm.network 'forwarded_port', guest: 3000, host: 80
+  
   [3000, 4000, 4567, 8080].each do |port|
     config.vm.network 'forwarded_port', guest: port, host: port
   end
@@ -120,17 +123,22 @@ Vagrant.configure('2') do |config|
         echo "SSH keys already provisioned."
         exit 0;
       fi
+      
       echo "SSH key provisioning."
       mkdir -p /home/vagrant/.ssh/
       touch /home/vagrant/.ssh/authorized_keys
       echo #{ssh_pub_key} >> /home/vagrant/.ssh/authorized_keys
+      
       touch /home/vagrant/.ssh/config
-      echo #{ssh_config} >> /home/vagrant/.ssh/config
+      echo #{ssh_config} > /home/vagrant/.ssh/config
       chmod 644 /home/vagrant/.ssh/config
+
       echo #{ssh_pub_key} > /home/vagrant/.ssh/id_rsa.pub
       chmod 644 /home/vagrant/.ssh/id_rsa.pub
+
       echo "#{ssh_prv_key}" > /home/vagrant/.ssh/id_rsa
       chmod 600 /home/vagrant/.ssh/id_rsa
+
       chown -R vagrant:vagrant /home/vagrant
       exit 0
     SHELL
