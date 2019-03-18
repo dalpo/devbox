@@ -117,7 +117,7 @@ Vagrant.configure('2') do |config|
     end
  
     s.inline = <<-SHELL
-      sudo apt install -y python
+      sudo apt install -y python virtualenv
 
       if grep -sq "#{ssh_pub_key}" /home/vagrant/.ssh/authorized_keys; then
         echo "SSH keys already provisioned."
