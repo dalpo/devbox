@@ -31,7 +31,7 @@ Vagrant.configure('2') do |config|
   
   config.vm.network 'forwarded_port', guest: 3000, host: 80
   
-  [3000, 4000, 4567, 8080].each do |port|
+  [3000, 4000, 4567, 8080, 3035, 3333].each do |port|
     config.vm.network 'forwarded_port', guest: port, host: port
   end
 
