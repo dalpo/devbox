@@ -31,7 +31,7 @@ Vagrant.configure('2') do |config|
   
   config.vm.network 'forwarded_port', guest: 3000, host: 80
   
-  [3000, 4000, 4567, 5000, 5100, 9090, 8080, 3035, 3333].each do |port|
+  [3000, 4000, 4567, 5000, 5100, 9090, 8080, 3035, 3333, 8999].each do |port|
     config.vm.network 'forwarded_port', guest: port, host: port
   end
 
@@ -77,8 +77,8 @@ Vagrant.configure('2') do |config|
     vb.gui = false
 
     # Customize the amount of memory on the VM:
-    vb.memory = ENV.fetch('DEVBOX_MEMORY', 8192).to_i
-    cpus = ENV.fetch('DEVBOX_CPUS', 6).to_i
+    vb.memory = ENV.fetch('DEVBOX_MEMORY', 6144).to_i
+    cpus = ENV.fetch('DEVBOX_CPUS', 4).to_i
     vb.cpus = cpus
 
     # Use VBoxManage to customize the VM. For example to change memory:
